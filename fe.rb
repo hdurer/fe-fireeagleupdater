@@ -10,9 +10,15 @@
 # tom@tommorris.org - http://tommorris.org
 # If you like this script, feel free to make a donation
 # https://tipit.to/tommorris.org
+# Original version @ http://tommorris.org/files/fe.rb.txt
+#
+# Modifications by Holger Durer:
+# - no longer require obsolete version of oauth
+# - more general concept of common locations (e.g. "fe @home", "fe @uni")
+# - without arguments queries current location
 
 require 'rubygems'
-gem 'oauth', '=0.2.2'
+gem 'oauth'
 require 'fireeagle'
 require 'yaml'
 
@@ -48,21 +54,44 @@ else
   puts "fe is now setup. Run it again to set your location:"
   puts "Usage: fe location"
   puts "e.g. fe \"London\" or fe \"Berlin\""
+  puts "To query your current location, just run fe without arguments."
+  puts "Edit ~/.fireeagle to define other default locations."
   if default.length != 0
-    puts "To set to your default, just run fe without arguments"
   end
   exit
 end
 
-if ARGV.length == 0 and data['default'].nil? == false
-   puts "Location set to default"
-   client.update(:q => data['default'])
-elsif ARGV.length == 1
-  puts "Location: " + ARGV[0]
-  client.update(:q => ARGV[0])
-elsif ARGV.length > 1
-  puts "Location: " + ARGV.to_s
-  client.update(:q => ARGV.to_s)
+if ARGV.length == 0 
+   user = client.location
+   location = user.best_guess
+   puts "Location: " + location.to_s + " (updated " + user.located_at.to_s + ")"
+   geo = location.geom
+   if geo.is_a?(GeoRuby::SimpleFeatures::Envelope)
+     bbox = [geo.lower_corner, geo.upper_corner]
+     geo = geo.center
+   else
+     bbox = geo.bounding_box
+   end
+   if bbox[0] == bbox[1]
+     geo_desc = bbox[0].x.to_s + ", " + bbox[0].y.to_s
+   else
+     geo_desc = bbox[0].x.to_s + ", " + bbox[0].y.to_s + " - " + bbox[1].x.to_s + ", " + bbox[1].y.to_s 
+   end
+   puts "woeid: " + location.woeid.to_s + " @ " + geo_desc
 else
-  print "Where are you, then?"
+  location = ARGV.to_s
+  if location[0, 1] == "@"
+     if data[location[1..-1]].nil?
+        puts "Unknown alias " + location
+        location = ""
+     else
+        location = data[location[1..-1]]
+     end
+  end
+  if location.length == 0
+     puts "You must give a location"
+  else
+    puts "Updating location to " + location
+    client.update(:q => location)
+  end
 end
