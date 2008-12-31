@@ -1,0 +1,17 @@
+A simple Fire Eagle command line updater written in Ruby.
+
+See http://tommorris.org/blog/2008/05/02
+
+Blurb from the script:
+------------------------------ 8< snip >8 ------------------------------
+fe - a super-simple Fire Eagle updater for the command line
+written in 100% hacky Ruby
+no guarantees
+Copyright (c) Tom Morris 2008. All rights reserved.
+Licensed under the GNU General Public License v. 3.
+see http://www.gnu.org/copyleft/gpl.html
+
+tom@tommorris.org - http://tommorris.org
+If you like this script, feel free to make a donation
+https://tipit.to/tommorris.org
+------------------------------ 8< snip >8 ------------------------------
